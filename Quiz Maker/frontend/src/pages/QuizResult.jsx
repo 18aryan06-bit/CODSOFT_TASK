@@ -1,0 +1,22 @@
+import { Link, Navigate, useLocation, useNavigate } from "react-router-dom";
+import { ArrowLeft, ArrowRight, Award, CheckCircle2, Home as HomeIcon, RotateCcw, XCircle } from "lucide-react";
+
+export default function QuizResult() {
+  const location = useLocation();
+  const navigate = useNavigate();
+  const result = location.state?.result;
+
+  if (!result) return <Navigate to="/quizzes" replace />;
+
+  const perfect = result.score === result.total;
+  const good = result.percentage >= 60;
+
+  return <main className="container-page max-w-4xl py-10 sm:py-14">
+    <div className="text-center"><div className={`mx-auto grid h-16 w-16 place-items-center rounded-2xl ${perfect?"bg-amber-100 text-amber-700":good?"bg-emerald-100 text-emerald-700":"bg-indigo-100 text-indigo-700"}`}><Award size={32}/></div><p className="eyebrow mt-5">QUIZ COMPLETE</p><h1 className="mt-2 text-3xl font-extrabold tracking-tight text-slate-950 sm:text-4xl">{perfect?"Outstanding work!":good?"Great effort!":"Keep learning!"}</h1><p className="mt-3 text-slate-600">Here's how you did on <span className="font-semibold text-slate-900">{result.title}</span>.</p></div>
+    <section className="card mx-auto mt-8 max-w-xl p-6 sm:p-8"><div className="grid grid-cols-2 gap-4 text-center"><div className="rounded-2xl bg-indigo-50 p-5"><p className="text-sm font-semibold text-indigo-700">Your score</p><p className="mt-2 text-4xl font-black text-indigo-950">{result.score}<span className="text-xl font-semibold text-indigo-400">/{result.total}</span></p></div><div className="rounded-2xl bg-slate-50 p-5"><p className="text-sm font-semibold text-slate-600">Percentage</p><p className="mt-2 text-4xl font-black text-slate-950">{result.percentage}<span className="text-xl">%</span></p></div></div><div className="mt-5 h-3 overflow-hidden rounded-full bg-slate-100"><div className={`h-full rounded-full transition-all ${good?"bg-emerald-500":"bg-amber-500"}`} style={{width:`${result.percentage}%`}}/></div><p className="mt-3 text-center text-sm text-slate-500">{result.score} correct · {result.total-result.score} incorrect</p><div className="mt-6 flex flex-col justify-center gap-3 sm:flex-row"><button onClick={()=>navigate(`/quiz/${result.quizId}`,{replace:true})} className="btn-primary"><RotateCcw size={17}/> Retake quiz</button><Link to="/" className="btn-secondary"><HomeIcon size={17}/> Back to home</Link></div></section>
+    <section className="mt-10"><div className="flex flex-col justify-between gap-2 sm:flex-row sm:items-end"><div><p className="eyebrow">ANSWER REVIEW</p><h2 className="mt-2 text-2xl font-bold text-slate-950">Question breakdown</h2></div><p className="text-sm text-slate-500">Review your answers and learn from mistakes.</p></div>
+      <div className="mt-5 space-y-4">{result.breakdown.map((item,index)=><article key={item.questionId || index} className={`rounded-2xl border p-5 sm:p-6 ${item.isCorrect?"border-emerald-200 bg-emerald-50/40":"border-rose-200 bg-rose-50/40"}`}><div className="flex items-start gap-3"><span className={`mt-0.5 shrink-0 ${item.isCorrect?"text-emerald-600":"text-rose-600"}`}>{item.isCorrect?<CheckCircle2 size={22}/>:<XCircle size={22}/>}</span><div className="min-w-0 flex-1"><p className="text-xs font-bold uppercase tracking-wider text-slate-500">Question {index+1}</p><h3 className="mt-1 font-bold leading-6 text-slate-900">{item.questionText}</h3><div className="mt-4 space-y-2">{item.options.map((option,optionIndex)=>{const isCorrectOption=optionIndex===item.correctAnswerIndex;const isSelected=optionIndex===item.selectedAnswerIndex;return <div key={optionIndex} className={`flex items-start gap-2 rounded-lg border px-3 py-2.5 text-sm ${isCorrectOption?"border-emerald-200 bg-emerald-100/70 text-emerald-900":isSelected?"border-rose-200 bg-rose-100/70 text-rose-900":"border-transparent bg-white/70 text-slate-600"}`}><span className="mt-0.5">{isCorrectOption?<CheckCircle2 size={16}/>:isSelected?<XCircle size={16}/>:<span className="inline-block w-4"/>}</span><span className="flex-1">{option}</span>{isSelected&&<span className="text-xs font-semibold">Your answer</span>}{isCorrectOption&&<span className="text-xs font-semibold">Correct</span>}</div>})}</div></div></div></article>)}</div>
+    </section>
+    <div className="mt-8 flex justify-center"><Link to="/quizzes" className="btn-ghost">Explore more quizzes <ArrowRight size={17}/></Link></div>
+  </main>;
+}
